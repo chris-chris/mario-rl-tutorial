@@ -1,14 +1,17 @@
 #!/usr/bin/env python
-import os, logging, gym
+import gym
+import logging
+import os
+from acktr.acktr_disc import learn
+from baselines import bench
 from baselines import logger
 from baselines.common import set_global_seeds
-from baselines import bench
-from acktr_disc import learn
 from baselines.common.vec_env.subproc_vec_env import SubprocVecEnv
-from baselines.common.atari_wrappers import wrap_deepmind
-from policies import CnnPolicy
+
+from acktr.policies import CnnPolicy
+
+
 #from gym.envs.ppaquette_gym_super_mario.wrappers.action_space import ToDiscrete
-import ppaquette_gym_super_mario
 
 def train(env_id, num_timesteps, seed, num_cpu):
   num_timesteps //= 4
