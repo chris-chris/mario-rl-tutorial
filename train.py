@@ -25,7 +25,19 @@ flags.DEFINE_string("algorithm", "deepq", "RL algorithm to use.")
 flags.DEFINE_integer("timesteps", 2000000, "Steps to train")
 
 def train_acktr(env_id, num_timesteps, seed, num_cpu):
+  """Train a acktr model.
 
+    Parameters
+    -------
+    env_id: environment to train on
+    num_timesteps: int
+        number of env steps to optimizer for
+    seed: int
+        number of random seed
+    num_cpu: int
+        number of parallel agents
+
+    """
   num_timesteps //= 4
 
   def make_env(rank):
@@ -47,6 +59,16 @@ def train_acktr(env_id, num_timesteps, seed, num_cpu):
   env.close()
 
 def train_dqn(env_id, num_timesteps):
+  """Train a dqn model.
+
+    Parameters
+    -------
+    env_id: environment to train on
+    num_timesteps: int
+        number of env steps to optimizer for
+
+    """
+
   # 1. Create gym environment
   env = gym.make(FLAGS.env)
   # 2. Apply action space wrapper
