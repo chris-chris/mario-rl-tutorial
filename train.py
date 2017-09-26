@@ -2,21 +2,30 @@
 import gym
 import logging
 import os
-from baselines.acktr.acktr_disc import learn
+import sys
+import gflags as flags
+
+from baselines.acktr import acktr_disc
 from baselines import bench
 from baselines import logger
 from baselines.common import set_global_seeds
 from baselines.common.vec_env.subproc_vec_env import SubprocVecEnv
+from baselines import deepq
 
 from baselines.acktr.policies import CnnPolicy
 
 import ppaquette_gym_super_mario
 
-from action_space import MarioActionSpace
+from wrappers import MarioActionSpaceWrapper
+from wrappers import ProcessFrame84
 
-MarioActionSpaceWrapper = MarioActionSpace()
+FLAGS = flags.FLAGS
+flags.DEFINE_string("env", "ppaquette/SuperMarioBros-1-1-v0", "RL environment to train.")
+flags.DEFINE_string("algorithm", "deepq", "RL algorithm to use.")
+flags.DEFINE_integer("timesteps", 2000000, "Steps to train")
 
-def train(env_id, num_timesteps, seed, num_cpu):
+def train_acktr(env_id, num_timesteps, seed, num_cpu):
+
   num_timesteps //= 4
 
   def make_env(rank):
@@ -34,12 +43,49 @@ def train(env_id, num_timesteps, seed, num_cpu):
   env = SubprocVecEnv([make_env(i) for i in range(num_cpu)])
 
   policy_fn = CnnPolicy
-  learn(policy_fn, env, seed, total_timesteps=num_timesteps, nprocs=num_cpu)
+  acktr_disc.learn(policy_fn, env, seed, total_timesteps=num_timesteps, nprocs=num_cpu)
+  env.close()
+
+def train_dqn(env_id, num_timesteps):
+  # 1. Create gym environment
+  env = gym.make(FLAGS.env)
+  # 2. Apply action space wrapper
+  env = MarioActionSpaceWrapper(env)
+  # 3. Apply observation space wrapper to reduce input size
+  env = ProcessFrame84(env)
+  # 4. Create a CNN model for Q-Function
+  model = deepq.models.cnn_to_mlp(
+    convs=[(32, 8, 4), (64, 4, 2), (64, 3, 1)],
+    hiddens=[256],
+    dueling=False
+  )
+  # 5. Train the model
+  act = deepq.learn(
+    env,
+    q_func=model,
+    lr=1e-4,
+    max_timesteps=FLAGS.timesteps,
+    buffer_size=10000,
+    exploration_fraction=0.1,
+    exploration_final_eps=0.01,
+    train_freq=4,
+    learning_starts=10000,
+    target_network_update_freq=1000,
+    gamma=0.99,
+    prioritized_replay=False
+  )
+  act.save("mario_model.pkl")
   env.close()
 
 def main():
-  train('ppaquette/SuperMarioBros-1-2-v0', num_timesteps=int(40e6), seed=0, num_cpu=2)
+  FLAGS(sys.argv)
+  # Choose which RL algorithm to train.
 
+  if(FLAGS.algorithm == "deepq"): # Use DQN
+    train_dqn(env_id=FLAGS.env, num_timesteps=FLAGS.timesteps)
+
+  elif(FLAGS.algorithm == "acktr"): # Use acktr
+    train_acktr(FLAGS.env, num_timesteps=FLAGS.timesteps, seed=0, num_cpu=2)
 
 if __name__ == '__main__':
   main()
