@@ -105,6 +105,12 @@ def main():
   FLAGS(sys.argv)
   # Choose which RL algorithm to train.
 
+  print("env : %s" % FLAGS.env)
+  print("algorithm : %s" % FLAGS.algorithm)
+  print("timesteps : %s" % FLAGS.timesteps)
+  print("prioritized : %s" % FLAGS.prioritized)
+  print("dueling : %s" % FLAGS.dueling)
+
   if(FLAGS.algorithm == "deepq"): # Use DQN
     train_dqn(env_id=FLAGS.env, num_timesteps=FLAGS.timesteps)
 
