@@ -23,6 +23,8 @@ FLAGS = flags.FLAGS
 flags.DEFINE_string("env", "ppaquette/SuperMarioBros-1-1-v0", "RL environment to train.")
 flags.DEFINE_string("algorithm", "deepq", "RL algorithm to use.")
 flags.DEFINE_integer("timesteps", 2000000, "Steps to train")
+flags.DEFINE_boolean("prioritized", False, "prioritized_replay")
+flags.DEFINE_boolean("dueling", False, "dueling")
 
 def train_acktr(env_id, num_timesteps, seed, num_cpu):
   """Train a acktr model.
@@ -79,7 +81,7 @@ def train_dqn(env_id, num_timesteps):
   model = deepq.models.cnn_to_mlp(
     convs=[(32, 8, 4), (64, 4, 2), (64, 3, 1)],
     hiddens=[256],
-    dueling=False
+    dueling=FLAGS.dueling
   )
   # 5. Train the model
   act = deepq.learn(
@@ -94,7 +96,7 @@ def train_dqn(env_id, num_timesteps):
     learning_starts=10000,
     target_network_update_freq=1000,
     gamma=0.99,
-    prioritized_replay=False
+    prioritized_replay=FLAGS.prioritized
   )
   act.save("mario_model.pkl")
   env.close()
