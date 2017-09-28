@@ -25,6 +25,7 @@ flags.DEFINE_string("algorithm", "deepq", "RL algorithm to use.")
 flags.DEFINE_integer("timesteps", 2000000, "Steps to train")
 flags.DEFINE_boolean("prioritized", False, "prioritized_replay")
 flags.DEFINE_boolean("dueling", False, "dueling")
+flags.DEFINE_integer("num_cpu", 4, "number of cpus")
 
 def train_acktr(env_id, num_timesteps, seed, num_cpu):
   """Train a acktr model.
@@ -110,12 +111,13 @@ def main():
   print("timesteps : %s" % FLAGS.timesteps)
   print("prioritized : %s" % FLAGS.prioritized)
   print("dueling : %s" % FLAGS.dueling)
+  print("num_cpu : %s" % FLAGS.num_cpu)
 
   if(FLAGS.algorithm == "deepq"): # Use DQN
     train_dqn(env_id=FLAGS.env, num_timesteps=FLAGS.timesteps)
 
   elif(FLAGS.algorithm == "acktr"): # Use acktr
-    train_acktr(FLAGS.env, num_timesteps=FLAGS.timesteps, seed=0, num_cpu=2)
+    train_acktr(FLAGS.env, num_timesteps=FLAGS.timesteps, seed=0, num_cpu=FLAGS.num_cpu)
 
 if __name__ == '__main__':
   main()
