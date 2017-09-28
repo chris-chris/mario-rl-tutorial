@@ -23,6 +23,7 @@ FLAGS = flags.FLAGS
 flags.DEFINE_string("env", "ppaquette/SuperMarioBros-1-1-v0", "RL environment to train.")
 flags.DEFINE_string("algorithm", "deepq", "RL algorithm to use.")
 flags.DEFINE_integer("timesteps", 2000000, "Steps to train")
+flags.DEFINE_float("exploration_fraction", 0.5, "Exploration Fraction")
 flags.DEFINE_boolean("prioritized", False, "prioritized_replay")
 flags.DEFINE_boolean("dueling", False, "dueling")
 flags.DEFINE_integer("num_cpu", 4, "number of cpus")
@@ -91,7 +92,7 @@ def train_dqn(env_id, num_timesteps):
     lr=1e-4,
     max_timesteps=FLAGS.timesteps,
     buffer_size=10000,
-    exploration_fraction=0.1,
+    exploration_fraction=FLAGS.exploration_fraction,
     exploration_final_eps=0.01,
     train_freq=4,
     learning_starts=10000,
@@ -109,6 +110,7 @@ def main():
   print("env : %s" % FLAGS.env)
   print("algorithm : %s" % FLAGS.algorithm)
   print("timesteps : %s" % FLAGS.timesteps)
+  print("exploration_fraction : %s" % FLAGS.exploration_fraction)
   print("prioritized : %s" % FLAGS.prioritized)
   print("dueling : %s" % FLAGS.dueling)
   print("num_cpu : %s" % FLAGS.num_cpu)
