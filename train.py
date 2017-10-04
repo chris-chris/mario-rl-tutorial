@@ -30,7 +30,7 @@ flags.DEFINE_boolean("prioritized", False, "prioritized_replay")
 flags.DEFINE_boolean("dueling", False, "dueling")
 flags.DEFINE_integer("num_cpu", 4, "number of cpus")
 
-Logger.DEFAULT = Logger.CURRENT = Logger(dir=None, output_formats=[TensorBoardOutputFormat("log")])
+#Logger.DEFAULT = Logger.CURRENT = Logger(dir=None, output_formats=[TensorBoardOutputFormat("log")])
 
 def train_acktr(env_id, num_timesteps, seed, num_cpu):
   """Train a acktr model.
@@ -67,12 +67,9 @@ def train_acktr(env_id, num_timesteps, seed, num_cpu):
   set_global_seeds(seed)
   env = SubprocVecEnv([make_env(i) for i in range(num_cpu)])
 
-  logger.info("logger.get_dir() : %s" % logger.get_dir())
-
   policy_fn = CnnPolicy
   acktr_disc.learn(policy_fn, env, seed, total_timesteps=num_timesteps, nprocs=num_cpu, save_interval=True)
   env.close()
-  logger.info("logger.get_dir() : %s" % logger.get_dir())
 
 def train_dqn(env_id, num_timesteps):
   """Train a dqn model.
