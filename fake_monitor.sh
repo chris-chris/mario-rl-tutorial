@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # for CentOS
-sudo yum install -y
+sudo yum install -y xvfb
 
 # for Ubuntu
 sudo apt-get install xvfb -y

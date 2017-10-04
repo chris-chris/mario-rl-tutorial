@@ -46,21 +46,29 @@ def train_acktr(env_id, num_timesteps, seed, num_cpu):
 
   def make_env(rank):
     def _thunk():
+      # 1. Create gym environment
       env = gym.make(env_id)
       env.seed(seed + rank)
       if logger.get_dir():
         env = bench.Monitor(env, os.path.join(logger.get_dir(), "{}.monitor.json".format(rank)))
       gym.logger.setLevel(logging.WARN)
+      # 2. Apply action space wrapper
+      env = MarioActionSpaceWrapper(env)
+      # 3. Apply observation space wrapper to reduce input size
+      env = ProcessFrame84(env)
 
-      return MarioActionSpaceWrapper(env)
+      return env
     return _thunk
 
   set_global_seeds(seed)
   env = SubprocVecEnv([make_env(i) for i in range(num_cpu)])
 
+  logger.info("logger.get_dir() : %s" % logger.get_dir())
+
   policy_fn = CnnPolicy
-  acktr_disc.learn(policy_fn, env, seed, total_timesteps=num_timesteps, nprocs=num_cpu)
+  acktr_disc.learn(policy_fn, env, seed, total_timesteps=num_timesteps, nprocs=num_cpu, save_interval=True)
   env.close()
+  logger.info("logger.get_dir() : %s" % logger.get_dir())
 
 def train_dqn(env_id, num_timesteps):
   """Train a dqn model.
@@ -107,13 +115,13 @@ def main():
   FLAGS(sys.argv)
   # Choose which RL algorithm to train.
 
-  print("env : %s" % FLAGS.env)
-  print("algorithm : %s" % FLAGS.algorithm)
-  print("timesteps : %s" % FLAGS.timesteps)
-  print("exploration_fraction : %s" % FLAGS.exploration_fraction)
-  print("prioritized : %s" % FLAGS.prioritized)
-  print("dueling : %s" % FLAGS.dueling)
-  print("num_cpu : %s" % FLAGS.num_cpu)
+  logger.info("env : %s" % FLAGS.env)
+  logger.info("algorithm : %s" % FLAGS.algorithm)
+  logger.info("timesteps : %s" % FLAGS.timesteps)
+  logger.info("exploration_fraction : %s" % FLAGS.exploration_fraction)
+  logger.info("prioritized : %s" % FLAGS.prioritized)
+  logger.info("dueling : %s" % FLAGS.dueling)
+  logger.info("num_cpu : %s" % FLAGS.num_cpu)
 
   if(FLAGS.algorithm == "deepq"): # Use DQN
     train_dqn(env_id=FLAGS.env, num_timesteps=FLAGS.timesteps)
