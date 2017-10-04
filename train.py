@@ -7,7 +7,7 @@ import gflags as flags
 
 from baselines import bench
 from baselines import logger
-from baselines.logger import Logger, TensorBoardOutputFormat
+from baselines.logger import Logger, TensorBoardOutputFormat, HumanOutputFormat
 
 from baselines.common import set_global_seeds
 from baselines.common.vec_env.subproc_vec_env import SubprocVecEnv
@@ -22,6 +22,7 @@ from wrappers import MarioActionSpaceWrapper
 from wrappers import ProcessFrame84
 
 FLAGS = flags.FLAGS
+flags.DEFINE_string("log", "stdout", "logging type(stdout, tensorboard)")
 flags.DEFINE_string("env", "ppaquette/SuperMarioBros-1-1-v0", "RL environment to train.")
 flags.DEFINE_string("algorithm", "deepq", "RL algorithm to use.")
 flags.DEFINE_integer("timesteps", 2000000, "Steps to train")
@@ -30,7 +31,7 @@ flags.DEFINE_boolean("prioritized", False, "prioritized_replay")
 flags.DEFINE_boolean("dueling", False, "dueling")
 flags.DEFINE_integer("num_cpu", 4, "number of cpus")
 
-#Logger.DEFAULT = Logger.CURRENT = Logger(dir=None, output_formats=[TensorBoardOutputFormat("log")])
+
 
 def train_acktr(env_id, num_timesteps, seed, num_cpu):
   """Train a acktr model.
@@ -115,6 +116,11 @@ def train_dqn(env_id, num_timesteps):
 def main():
   FLAGS(sys.argv)
   # Choose which RL algorithm to train.
+
+  if(FLAGS.log == "tensorboard"):
+    Logger.DEFAULT = Logger.CURRENT = Logger(dir=None, output_formats=[TensorBoardOutputFormat("tensorboard")])
+  elif(FLAGS.log == "stdout"):
+    Logger.DEFAULT = Logger.CURRENT = Logger(dir=None, output_formats=[HumanOutputFormat(sys.stdout)])
 
   logger.info("env : %s" % FLAGS.env)
   logger.info("algorithm : %s" % FLAGS.algorithm)
