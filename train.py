@@ -5,14 +5,16 @@ import os
 import sys
 import gflags as flags
 
-from baselines.acktr import acktr_disc
 from baselines import bench
 from baselines import logger
+from baselines.logger import Logger, TensorBoardOutputFormat
+
 from baselines.common import set_global_seeds
 from baselines.common.vec_env.subproc_vec_env import SubprocVecEnv
 from baselines import deepq
 
 from baselines.acktr.policies import CnnPolicy
+from baselines.acktr import acktr_disc
 
 import ppaquette_gym_super_mario
 
@@ -27,6 +29,8 @@ flags.DEFINE_float("exploration_fraction", 0.5, "Exploration Fraction")
 flags.DEFINE_boolean("prioritized", False, "prioritized_replay")
 flags.DEFINE_boolean("dueling", False, "dueling")
 flags.DEFINE_integer("num_cpu", 4, "number of cpus")
+
+Logger.DEFAULT = Logger.CURRENT = Logger(dir=None, output_formats=[TensorBoardOutputFormat("log")])
 
 def train_acktr(env_id, num_timesteps, seed, num_cpu):
   """Train a acktr model.
@@ -127,7 +131,7 @@ def main():
     train_dqn(env_id=FLAGS.env, num_timesteps=FLAGS.timesteps)
 
   elif(FLAGS.algorithm == "acktr"): # Use acktr
-    train_acktr(FLAGS.env, num_timesteps=FLAGS.timesteps, seed=0, num_cpu=FLAGS.num_cpu)
+    train_acktr(FLAGS.env, num_timesteps=int(FLAGS.timesteps), seed=0, num_cpu=FLAGS.num_cpu)
 
 if __name__ == '__main__':
   main()
