@@ -33,13 +33,13 @@ python3 train.py --algorithm=deepq --timesteps=2000000 --log=stdout --env=ppaque
 
 ```
 
-|                      | Description                                     | Default                         | Parater Type |
-|----------------------|-------------------------------------------------|---------------------------------|--------------|
-| env                  | Gym Environment                                 | ppaquette/SuperMarioBros-1-1-v0 | string       |
-| log                  | logging type  : tensorboard, stdout             | stdout                          | string       |
-| algorithm            | Currently, support 2 algorithms  : deepq, acktr | deepq                           | string       |
-| timesteps            | Total training steps                            | 2000000                         | int          |
-| exploration_fraction | exploration fraction                            | 0.5                             | float        |
-| prioritized          | Whether using prioritized replay for DQN        | False                           | boolean      |
-| dueling              | Whether using dueling network for DQN           | False                           | boolean      |
-| num_cpu              | number of agents for A3C(acktr)                 | 4                               | int          |
+|                      | Description                                     | Default                         | Parameter Type |
+|----------------------|-------------------------------------------------|---------------------------------|----------------|
+| env                  | Gym Environment                                 | ppaquette/SuperMarioBros-1-1-v0 | string         |
+| log                  | logging type  : tensorboard, stdout             | stdout                          | string         |
+| algorithm            | Currently, support 2 algorithms  : deepq, acktr | deepq                           | string         |
+| timesteps            | Total training steps                            | 2000000                         | int            |
+| exploration_fraction | exploration fraction                            | 0.5                             | float          |
+| prioritized          | Whether using prioritized replay for DQN        | False                           | boolean        |
+| dueling              | Whether using dueling network for DQN           | False                           | boolean        |
+| num_cpu              | number of agents for A3C(acktr)                 | 4                               | int            |
