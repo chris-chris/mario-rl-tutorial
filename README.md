@@ -21,7 +21,7 @@ To train the model, run
 
 ```shell
 
-python3 train.py --algorithm=deepq --timesteps=2000000 --log=stdout --env=ppaquette/SuperMarioBros-1-1-v0
+python3 train.py
 
 ```
 
