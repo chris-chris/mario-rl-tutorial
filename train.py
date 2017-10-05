@@ -115,12 +115,33 @@ def train_dqn(env_id, num_timesteps):
 
 def main():
   FLAGS(sys.argv)
-  # Choose which RL algorithm to train.
+  logdir = "tensorboard"
+  if(FLAGS.algorithm == "deepq"):
+    logdir = "tensorboard/%s/%s_%s_%s_%s" % (
+      FLAGS.algorithm,
+      FLAGS.timesteps,
+      FLAGS.exploration_fraction,
+      FLAGS.prioritized,
+      FLAGS.dueling,
+    )
+  elif(FLAGS.algorithm == "acktr"):
+    logdir = "tensorboard/%s/%s_%s" % (
+      FLAGS.algorithm,
+      FLAGS.timesteps,
+      FLAGS.num_cpu,
+    )
 
   if(FLAGS.log == "tensorboard"):
-    Logger.DEFAULT = Logger.CURRENT = Logger(dir=None, output_formats=[TensorBoardOutputFormat("tensorboard")])
+    Logger.DEFAULT \
+      = Logger.CURRENT \
+      = Logger(dir=None,
+               output_formats=[TensorBoardOutputFormat(logdir)])
+
   elif(FLAGS.log == "stdout"):
-    Logger.DEFAULT = Logger.CURRENT = Logger(dir=None, output_formats=[HumanOutputFormat(sys.stdout)])
+    Logger.DEFAULT \
+      = Logger.CURRENT \
+      = Logger(dir=None,
+               output_formats=[HumanOutputFormat(sys.stdout)])
 
   logger.info("env : %s" % FLAGS.env)
   logger.info("algorithm : %s" % FLAGS.algorithm)
@@ -130,6 +151,7 @@ def main():
   logger.info("dueling : %s" % FLAGS.dueling)
   logger.info("num_cpu : %s" % FLAGS.num_cpu)
 
+  # Choose which RL algorithm to train.
   if(FLAGS.algorithm == "deepq"): # Use DQN
     train_dqn(env_id=FLAGS.env, num_timesteps=FLAGS.timesteps)
 
