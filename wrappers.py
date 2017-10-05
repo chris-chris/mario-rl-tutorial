@@ -17,6 +17,7 @@ class ProcessFrame84(gym.ObservationWrapper):
     resized_screen = cv2.resize(img, (84, 110), interpolation=cv2.INTER_AREA)
     x_t = resized_screen[18:102, :]
     x_t = np.reshape(x_t, [84, 84, 1])
+    x_t = np.nan_to_num(x_t)
     return x_t.astype(np.uint8)
 
 
