@@ -25,7 +25,7 @@ python3 train.py
 
 ```
 
-## Paramteres
+## Paramters
 
 You can also customize the training with parameters.
 
