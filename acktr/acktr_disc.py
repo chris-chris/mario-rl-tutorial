@@ -106,7 +106,7 @@ class Model(object):
 
 class Runner(object):
 
-  def __init__(self, env, model, nsteps, nstack, gamma):
+  def __init__(self, env, model, nsteps, nstack, gamma, callback=None):
     self.env = env
     self.model = model
     nh, nw, nc = env.observation_space.shape
@@ -123,12 +123,14 @@ class Runner(object):
     self.episode_rewards = [0.0]
     self.episodes = 0
     self.steps = 0
+    self.callback = callback
 
   def update_obs(self, obs):
     self.obs = np.roll(self.obs, shift=-1, axis=3)
     self.obs[:, :, :, -1] = obs[:, :, :, 0]
 
   def run(self):
+    model = self.model
     mb_obs, mb_rewards, mb_actions, mb_values, mb_dones = [],[],[],[],[]
     mb_states = self.states
     for n in range(self.nsteps):
@@ -140,22 +142,27 @@ class Runner(object):
       obs, rewards, dones, _ = self.env.step(actions)
       self.states = states
       self.dones = dones
-      self.steps += 1
+      self.steps += self.env.num_envs
+
       for n, done in enumerate(dones):
         self.total_reward[n] += float(rewards[n])
         if done:
           self.episodes += 1
+          num_episodes = self.episodes
           self.obs[n] = self.obs[n]*0
           self.episode_rewards.append(self.total_reward[n])
           mean_100ep_reward = round(np.mean(self.episode_rewards[-101:-1]), 1)
-          print("self.episode_rewards[-101:-1] %s" % self.episode_rewards[-101:-1])
+          #print("self.episode_rewards[-101:-1] %s" % self.episode_rewards[-101:-1])
           print("env %s done! reward : %s mean_100ep_reward : %s " % (n, self.total_reward[n], mean_100ep_reward))
           logger.record_tabular("reward", self.total_reward[n])
           logger.record_tabular("mean 100 episode reward", mean_100ep_reward)
           logger.record_tabular("steps", self.steps)
           logger.record_tabular("episodes", self.episodes)
-
           logger.dump_tabular()
+
+          if self.callback is not None:
+            self.callback(locals(), globals())
+
           self.total_reward[n] = 0
       self.update_obs(obs)
       mb_rewards.append(rewards)
@@ -187,7 +194,7 @@ class Runner(object):
 
 def learn(policy, env, seed, total_timesteps=int(40e6), gamma=0.99, log_interval=1, nprocs=32, nsteps=20,
           nstack=4, ent_coef=0.01, vf_coef=0.5, vf_fisher_coef=1.0, lr=0.25, max_grad_norm=0.5,
-          kfac_clip=0.001, save_interval=None, lrschedule='linear'):
+          kfac_clip=0.001, save_interval=None, lrschedule='linear', callback=None):
   tf.reset_default_graph()
   set_global_seeds(seed)
 
@@ -204,7 +211,7 @@ def learn(policy, env, seed, total_timesteps=int(40e6), gamma=0.99, log_interval
       fh.write(cloudpickle.dumps(make_model))
   model = make_model()
 
-  runner = Runner(env, model, nsteps=nsteps, nstack=nstack, gamma=gamma)
+  runner = Runner(env, model, nsteps=nsteps, nstack=nstack, gamma=gamma, callback=callback)
   nbatch = nenvs*nsteps
   tstart = time.time()
   enqueue_threads = model.q_runner.create_threads(model.sess, coord=tf.train.Coordinator(), start=True)

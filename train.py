@@ -81,7 +81,9 @@ def train_acktr(env_id, num_timesteps, seed, num_cpu):
   env = SubprocVecEnv([make_env(i) for i in range(num_cpu)])
 
   policy_fn = CnnPolicy
-  acktr_disc.learn(policy_fn, env, seed, total_timesteps=num_timesteps, nprocs=num_cpu, save_interval=True, lr=FLAGS.rl)
+  acktr_disc.learn(policy_fn, env, seed, total_timesteps=num_timesteps,
+                   nprocs=num_cpu, save_interval=True, lr=FLAGS.lr,
+                   callback=acktr_callback)
   env.close()
 
 def train_dqn(env_id, num_timesteps):
@@ -128,6 +130,7 @@ def train_dqn(env_id, num_timesteps):
   env.close()
 
 def deepq_callback(locals, globals):
+  #pprint.pprint(locals)
   global max_mean_reward, last_filename
   if('done' in locals and locals['done'] == True):
     if('mean_100ep_reward' in locals
@@ -158,6 +161,39 @@ def deepq_callback(locals, globals):
       act.save(filename)
       print("save best mean_100ep_reward model to %s" % filename)
       last_filename = filename
+
+def acktr_callback(locals, globals):
+  global max_mean_reward, last_filename
+  #pprint.pprint(locals)
+
+  if('mean_100ep_reward' in locals
+     and locals['num_episodes'] >= 10
+     and locals['mean_100ep_reward'] > max_mean_reward
+     ):
+    print("mean_100ep_reward : %s max_mean_reward : %s" %
+          (locals['mean_100ep_reward'], max_mean_reward))
+
+    if(not os.path.exists(os.path.join(PROJ_DIR,'models/acktr/'))):
+      try:
+        os.mkdir(os.path.join(PROJ_DIR,'models/'))
+      except Exception as e:
+        print(str(e))
+      try:
+        os.mkdir(os.path.join(PROJ_DIR,'models/acktr/'))
+      except Exception as e:
+        print(str(e))
+
+    if(last_filename != ""):
+      os.remove(last_filename)
+      print("delete last model file : %s" % last_filename)
+
+    max_mean_reward = locals['mean_100ep_reward']
+    model = locals['model']
+
+    filename = os.path.join(PROJ_DIR,'models/acktr/mario_reward_%s.pkl' % locals['mean_100ep_reward'])
+    model.save(filename)
+    print("save best mean_100ep_reward model to %s" % filename)
+    last_filename = filename
 
 def main():
   FLAGS(sys.argv)
