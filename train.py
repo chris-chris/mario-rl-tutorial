@@ -38,6 +38,7 @@ flags.DEFINE_float("exploration_fraction", 0.5, "Exploration Fraction")
 flags.DEFINE_boolean("prioritized", False, "prioritized_replay")
 flags.DEFINE_boolean("dueling", False, "dueling")
 flags.DEFINE_integer("num_cpu", 4, "number of cpus")
+flags.DEFINE_float("lr", 5e-4, "Learning rate")
 
 max_mean_reward = 0
 last_filename = ""
@@ -80,7 +81,7 @@ def train_acktr(env_id, num_timesteps, seed, num_cpu):
   env = SubprocVecEnv([make_env(i) for i in range(num_cpu)])
 
   policy_fn = CnnPolicy
-  acktr_disc.learn(policy_fn, env, seed, total_timesteps=num_timesteps, nprocs=num_cpu, save_interval=True)
+  acktr_disc.learn(policy_fn, env, seed, total_timesteps=num_timesteps, nprocs=num_cpu, save_interval=True, lr=FLAGS.rl)
   env.close()
 
 def train_dqn(env_id, num_timesteps):
@@ -111,7 +112,7 @@ def train_dqn(env_id, num_timesteps):
   act = deepq.learn(
     env,
     q_func=model,
-    lr=1e-4,
+    lr=FLAGS.rl,
     max_timesteps=FLAGS.timesteps,
     buffer_size=10000,
     exploration_fraction=FLAGS.exploration_fraction,
