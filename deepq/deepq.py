@@ -212,6 +212,7 @@ def learn(env,
   reset = True
   mean_100ep_reward = 0
   rew = 0
+  num_episodes = 0
 
   with tempfile.TemporaryDirectory() as td:
     model_file = os.path.join(td, "model")

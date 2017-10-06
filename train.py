@@ -21,7 +21,7 @@ import ppaquette_gym_super_mario
 from wrappers import MarioActionSpaceWrapper
 from wrappers import ProcessFrame84
 
-PROJ_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PROJ_DIR = os.path.dirname(os.path.abspath(__file__))
 
 import pprint
 
@@ -123,8 +123,9 @@ def deepq_callback(locals, globals):
   global max_mean_reward, last_filename
   if('done' in locals and locals['done'] == True):
     if('mean_100ep_reward' in locals
-       and locals['mean_100ep_reward'] > max_mean_reward
-       ):
+      and locals['num_episodes'] >= 10
+      and locals['mean_100ep_reward'] > max_mean_reward
+      ):
       print("mean_100ep_reward : %s max_mean_reward : %s" %
             (locals['mean_100ep_reward'], max_mean_reward))
 
