@@ -36,6 +36,7 @@ flags.DEFINE_boolean("dueling", False, "dueling")
 flags.DEFINE_integer("num_cpu", 4, "number of cpus")
 
 max_mean_reward = 0
+last_filename = ""
 
 def train_acktr(env_id, num_timesteps, seed, num_cpu):
   """Train a acktr model.
@@ -119,14 +120,14 @@ def train_dqn(env_id, num_timesteps):
   env.close()
 
 def deepq_callback(locals, globals):
-  global max_mean_reward
+  global max_mean_reward, last_filename
   if('done' in locals and locals['done'] == True):
     if('mean_100ep_reward' in locals
        and locals['mean_100ep_reward'] > max_mean_reward
        ):
       print("mean_100ep_reward : %s max_mean_reward : %s" %
             (locals['mean_100ep_reward'], max_mean_reward))
-      
+
       if(not os.path.exists(os.path.join(PROJ_DIR,'models/deepq/'))):
         try:
           os.mkdir(os.path.join(PROJ_DIR,'models/'))
@@ -137,12 +138,17 @@ def deepq_callback(locals, globals):
         except Exception as e:
           print(str(e))
 
+      if(last_filename != ""):
+        os.remove(last_filename)
+        print("delete last model file : %s" % last_filename)
+
       max_mean_reward = locals['mean_100ep_reward']
       act = deepq.ActWrapper(locals['act'], locals['act_params'])
 
       filename = os.path.join(PROJ_DIR,'models/deepq/mario_reward_%s.pkl' % locals['mean_100ep_reward'])
       act.save(filename)
       print("save best mean_100ep_reward model to %s" % filename)
+      last_filename = filename
 
 def main():
   FLAGS(sys.argv)
