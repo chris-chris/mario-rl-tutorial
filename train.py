@@ -21,6 +21,8 @@ import ppaquette_gym_super_mario
 from wrappers import MarioActionSpaceWrapper
 from wrappers import ProcessFrame84
 
+import datetime
+
 PROJ_DIR = os.path.dirname(os.path.abspath(__file__))
 
 import pprint
@@ -37,6 +39,8 @@ flags.DEFINE_integer("num_cpu", 4, "number of cpus")
 
 max_mean_reward = 0
 last_filename = ""
+
+start_time = datetime.datetime.now().strftime("%Y%m%d%H%M")
 
 def train_acktr(env_id, num_timesteps, seed, num_cpu):
   """Train a acktr model.
@@ -155,18 +159,20 @@ def main():
   FLAGS(sys.argv)
   logdir = "tensorboard"
   if(FLAGS.algorithm == "deepq"):
-    logdir = "tensorboard/%s/%s_%s_%s_%s" % (
+    logdir = "tensorboard/%s/%s_%s_%s_%s/%s" % (
       FLAGS.algorithm,
       FLAGS.timesteps,
       FLAGS.exploration_fraction,
       FLAGS.prioritized,
       FLAGS.dueling,
+      start_time
     )
   elif(FLAGS.algorithm == "acktr"):
-    logdir = "tensorboard/%s/%s_%s" % (
+    logdir = "tensorboard/%s/%s_%s/%s" % (
       FLAGS.algorithm,
       FLAGS.timesteps,
       FLAGS.num_cpu,
+      start_time
     )
 
   if(FLAGS.log == "tensorboard"):
