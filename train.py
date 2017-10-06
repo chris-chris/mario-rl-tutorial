@@ -11,8 +11,8 @@ from baselines.logger import Logger, TensorBoardOutputFormat, HumanOutputFormat
 
 from baselines.common import set_global_seeds
 from baselines.common.vec_env.subproc_vec_env import SubprocVecEnv
-from baselines import deepq
-
+from deepq import deepq
+from deepq.models import cnn_to_mlp
 from baselines.acktr.policies import CnnPolicy
 from baselines.acktr import acktr_disc
 
@@ -20,6 +20,8 @@ import ppaquette_gym_super_mario
 
 from wrappers import MarioActionSpaceWrapper
 from wrappers import ProcessFrame84
+
+import pprint
 
 FLAGS = flags.FLAGS
 flags.DEFINE_string("log", "stdout", "logging type(stdout, tensorboard)")
@@ -90,7 +92,7 @@ def train_dqn(env_id, num_timesteps):
   # 3. Apply observation space wrapper to reduce input size
   env = ProcessFrame84(env)
   # 4. Create a CNN model for Q-Function
-  model = deepq.models.cnn_to_mlp(
+  model = cnn_to_mlp(
     convs=[(32, 8, 4), (64, 4, 2), (64, 3, 1)],
     hiddens=[256],
     dueling=FLAGS.dueling
@@ -108,10 +110,26 @@ def train_dqn(env_id, num_timesteps):
     learning_starts=10000,
     target_network_update_freq=1000,
     gamma=0.99,
-    prioritized_replay=FLAGS.prioritized
+    prioritized_replay=FLAGS.prioritized,
+    callback=deepq_callback
   )
   act.save("mario_model.pkl")
   env.close()
+
+def deepq_callback(locals, globals):
+  if('done' in locals and locals['done'] == True):
+    if('mean_100ep_reward' in locals and 'saved_mean_reward' in locals
+       and (
+              locals['saved_mean_reward'] is None or
+                locals['mean_100ep_reward'] >= locals['saved_mean_reward']
+            )):
+      if(not os.path.exists("models/deepq")):
+        os.mkdir('models/')
+        os.mkdir('models/deepq/')
+      act = deepq.ActWrapper(locals['act'], locals['act_params'])
+      filename = 'models/deepq/mario_reward_%s.pkl' % locals['mean_100ep_reward']
+      act.save(filename)
+      print("save best mean_100ep_reward model to %s" % filename)
 
 def main():
   FLAGS(sys.argv)
