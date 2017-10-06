@@ -21,6 +21,8 @@ import ppaquette_gym_super_mario
 from wrappers import MarioActionSpaceWrapper
 from wrappers import ProcessFrame84
 
+PROJ_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 import pprint
 
 FLAGS = flags.FLAGS
@@ -125,11 +127,12 @@ def deepq_callback(locals, globals):
       print("mean_100ep_reward : %s max_mean_reward : %s" %
             (locals['mean_100ep_reward'], max_mean_reward))
       if(not os.path.exists("models/deepq")):
-        os.mkdir('models/')
-        os.mkdir('models/deepq/')
+        os.mkdir(os.path.join(PROJ_DIR,'models/'))
+        os.mkdir(os.path.join(PROJ_DIR,'models/deepq/'))
       max_mean_reward = locals['mean_100ep_reward']
       act = deepq.ActWrapper(locals['act'], locals['act_params'])
-      filename = 'models/deepq/mario_reward_%s.pkl' % locals['mean_100ep_reward']
+
+      filename = os.path.join(PROJ_DIR,'models/deepq/mario_reward_%s.pkl' % locals['mean_100ep_reward'])
       act.save(filename)
       print("save best mean_100ep_reward model to %s" % filename)
 
