@@ -33,7 +33,7 @@ flags.DEFINE_boolean("prioritized", False, "prioritized_replay")
 flags.DEFINE_boolean("dueling", False, "dueling")
 flags.DEFINE_integer("num_cpu", 4, "number of cpus")
 
-
+max_mean_reward = 0
 
 def train_acktr(env_id, num_timesteps, seed, num_cpu):
   """Train a acktr model.
@@ -117,15 +117,17 @@ def train_dqn(env_id, num_timesteps):
   env.close()
 
 def deepq_callback(locals, globals):
+  global max_mean_reward
   if('done' in locals and locals['done'] == True):
-    if('mean_100ep_reward' in locals and 'saved_mean_reward' in locals
-       and (
-              locals['saved_mean_reward'] is None or
-                locals['mean_100ep_reward'] >= locals['saved_mean_reward']
-            )):
+    if('mean_100ep_reward' in locals
+       and locals['mean_100ep_reward'] > max_mean_reward
+       ):
+      print("mean_100ep_reward : %s max_mean_reward : %s" %
+            (locals['mean_100ep_reward'], max_mean_reward))
       if(not os.path.exists("models/deepq")):
         os.mkdir('models/')
         os.mkdir('models/deepq/')
+      max_mean_reward = locals['mean_100ep_reward']
       act = deepq.ActWrapper(locals['act'], locals['act_params'])
       filename = 'models/deepq/mario_reward_%s.pkl' % locals['mean_100ep_reward']
       act.save(filename)
