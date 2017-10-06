@@ -126,7 +126,7 @@ def deepq_callback(locals, globals):
        ):
       print("mean_100ep_reward : %s max_mean_reward : %s" %
             (locals['mean_100ep_reward'], max_mean_reward))
-      if(not os.path.exists("models/deepq")):
+      if(not os.path.exists(os.path.join(PROJ_DIR,'models/deepq/'))):
         os.mkdir(os.path.join(PROJ_DIR,'models/'))
         os.mkdir(os.path.join(PROJ_DIR,'models/deepq/'))
       max_mean_reward = locals['mean_100ep_reward']
