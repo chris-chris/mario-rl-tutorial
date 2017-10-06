@@ -126,9 +126,17 @@ def deepq_callback(locals, globals):
        ):
       print("mean_100ep_reward : %s max_mean_reward : %s" %
             (locals['mean_100ep_reward'], max_mean_reward))
+      
       if(not os.path.exists(os.path.join(PROJ_DIR,'models/deepq/'))):
-        os.mkdir(os.path.join(PROJ_DIR,'models/'))
-        os.mkdir(os.path.join(PROJ_DIR,'models/deepq/'))
+        try:
+          os.mkdir(os.path.join(PROJ_DIR,'models/'))
+        except Exception as e:
+          print(str(e))
+        try:
+          os.mkdir(os.path.join(PROJ_DIR,'models/deepq/'))
+        except Exception as e:
+          print(str(e))
+
       max_mean_reward = locals['mean_100ep_reward']
       act = deepq.ActWrapper(locals['act'], locals['act_params'])
 
