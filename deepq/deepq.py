@@ -169,7 +169,7 @@ def learn(env,
   sess.__enter__()
 
   def make_obs_ph(name):
-    return U.BatchInput(env.observation_space.shape, name=name)
+    return U.BatchInput((84,84,4), name=name)
 
   act, train, update_target, debug = deepq.build_train(
     make_obs_ph=make_obs_ph,

@@ -11,10 +11,12 @@ from baselines.logger import Logger, TensorBoardOutputFormat, HumanOutputFormat
 
 from baselines.common import set_global_seeds
 from baselines.common.vec_env.subproc_vec_env import SubprocVecEnv
+
 from deepq import deepq
 from deepq.models import cnn_to_mlp
-from baselines.acktr.policies import CnnPolicy
-from baselines.acktr import acktr_disc
+
+from acktr.policies import CnnPolicy
+from acktr import acktr_disc
 
 import ppaquette_gym_super_mario
 
@@ -98,6 +100,7 @@ def train_dqn(env_id, num_timesteps):
   env = MarioActionSpaceWrapper(env)
   # 3. Apply observation space wrapper to reduce input size
   env = ProcessFrame84(env)
+
   # 4. Create a CNN model for Q-Function
   model = cnn_to_mlp(
     convs=[(32, 8, 4), (64, 4, 2), (64, 3, 1)],
