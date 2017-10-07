@@ -199,19 +199,21 @@ def main():
   FLAGS(sys.argv)
   logdir = "tensorboard"
   if(FLAGS.algorithm == "deepq"):
-    logdir = "tensorboard/%s/%s_%s_%s_%s/%s" % (
+    logdir = "tensorboard/%s/%s_%s_prio%s_duel%s_lr%s/%s" % (
       FLAGS.algorithm,
       FLAGS.timesteps,
       FLAGS.exploration_fraction,
       FLAGS.prioritized,
       FLAGS.dueling,
+      FLAGS.lr,
       start_time
     )
   elif(FLAGS.algorithm == "acktr"):
-    logdir = "tensorboard/%s/%s_%s/%s" % (
+    logdir = "tensorboard/%s/%s_num%s_lr%s/%s" % (
       FLAGS.algorithm,
       FLAGS.timesteps,
       FLAGS.num_cpu,
+      FLAGS.lr,
       start_time
     )
 
@@ -227,13 +229,14 @@ def main():
       = Logger(dir=None,
                output_formats=[HumanOutputFormat(sys.stdout)])
 
-  logger.info("env : %s" % FLAGS.env)
-  logger.info("algorithm : %s" % FLAGS.algorithm)
-  logger.info("timesteps : %s" % FLAGS.timesteps)
-  logger.info("exploration_fraction : %s" % FLAGS.exploration_fraction)
-  logger.info("prioritized : %s" % FLAGS.prioritized)
-  logger.info("dueling : %s" % FLAGS.dueling)
-  logger.info("num_cpu : %s" % FLAGS.num_cpu)
+  print("env : %s" % FLAGS.env)
+  print("algorithm : %s" % FLAGS.algorithm)
+  print("timesteps : %s" % FLAGS.timesteps)
+  print("exploration_fraction : %s" % FLAGS.exploration_fraction)
+  print("prioritized : %s" % FLAGS.prioritized)
+  print("dueling : %s" % FLAGS.dueling)
+  print("num_cpu : %s" % FLAGS.num_cpu)
+  print("lr : %s" % FLAGS.num_cpu)
 
   # Choose which RL algorithm to train.
   if(FLAGS.algorithm == "deepq"): # Use DQN
