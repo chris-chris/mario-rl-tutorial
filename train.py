@@ -114,7 +114,7 @@ def train_dqn(env_id, num_timesteps):
   act = deepq.learn(
     env,
     q_func=model,
-    lr=FLAGS.rl,
+    lr=FLAGS.lr,
     max_timesteps=FLAGS.timesteps,
     buffer_size=10000,
     exploration_fraction=FLAGS.exploration_fraction,
