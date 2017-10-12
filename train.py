@@ -236,7 +236,7 @@ def main():
   print("prioritized : %s" % FLAGS.prioritized)
   print("dueling : %s" % FLAGS.dueling)
   print("num_cpu : %s" % FLAGS.num_cpu)
-  print("lr : %s" % FLAGS.num_cpu)
+  print("lr : %s" % FLAGS.lr)
 
   # Choose which RL algorithm to train.
   if(FLAGS.algorithm == "deepq"): # Use DQN

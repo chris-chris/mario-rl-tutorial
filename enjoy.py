@@ -23,6 +23,7 @@ steps = 200
 FLAGS = flags.FLAGS
 flags.DEFINE_string("env", "ppaquette/SuperMarioBros-1-1-v0", "RL environment to train.")
 flags.DEFINE_string("algorithm", "deepq", "RL algorithm to use.")
+flags.DEFINE_string("file", "mario_reward_930.6.pkl", "Trained model file to use.")
 
 def main():
   FLAGS(sys.argv)
@@ -35,7 +36,7 @@ def main():
 
   if(FLAGS.algorithm == "deepq"):
 
-    act = deepq.load("models/deepq/mario_reward_739.3.pkl")
+    act = deepq.load("models/deepq/%s" % FLAGS.file)
     nstack = 4
     nh, nw, nc = env.observation_space.shape
     history = np.zeros((1, nh, nw, nc*nstack), dtype=np.uint8)
@@ -58,7 +59,7 @@ def main():
 
     policy_fn = CnnPolicy
     model = acktr_disc.load(policy_fn, env, seed=0, total_timesteps=1,
-                     nprocs=4, filename="models/acktr/mario_reward_696.7.pkl")
+                     nprocs=4, filename="models/acktr/%s" % FLAGS.file)
     nstack = 4
     nh, nw, nc = env.observation_space.shape
     history = np.zeros((1, nh, nw, nc*nstack), dtype=np.uint8)

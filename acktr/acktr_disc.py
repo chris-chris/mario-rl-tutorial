@@ -15,14 +15,18 @@ from baselines.acktr import kfac
 
 class Model(object):
 
-  def __init__(self, policy, ob_space, ac_space, nenvs,total_timesteps, nprocs=32, nsteps=20,
+  def __init__(self, policy, ob_space, ac_space, nenvs, total_timesteps, nprocs=32, nsteps=20,
                nstack=4, ent_coef=0.01, vf_coef=0.5, vf_fisher_coef=1.0, lr=0.25, max_grad_norm=0.5,
                kfac_clip=0.001, lrschedule='linear'):
     config = tf.ConfigProto(allow_soft_placement=True,
                             intra_op_parallelism_threads=nprocs,
                             inter_op_parallelism_threads=nprocs)
     config.gpu_options.allow_growth = True
+    from tensorflow.python import debug as tf_debug
+
     self.sess = sess = tf.Session(config=config)
+    self.sess = tf_debug.LocalCLIDebugWrapperSession(sess)
+
     nact = ac_space.n
     nbatch = nenvs * nsteps
     A = tf.placeholder(tf.int32, [nbatch])
@@ -91,8 +95,6 @@ class Model(object):
       for p, loaded_p in zip(params, loaded_params):
         restores.append(p.assign(loaded_p))
       sess.run(restores)
-
-
 
     self.train = train
     self.save = save
@@ -211,19 +213,47 @@ def load(policy, env, seed, filename, total_timesteps=int(40e6), nprocs=32, nste
 
   return model
 
-def learn(policy, env, seed, total_timesteps=int(40e6), gamma=0.99, log_interval=1, nprocs=32, nsteps=20,
-          nstack=4, ent_coef=0.01, vf_coef=0.5, vf_fisher_coef=1.0, lr=0.25, max_grad_norm=0.5,
-          kfac_clip=0.001, save_interval=None, lrschedule='linear', callback=None):
+def learn(policy,
+          env,
+          seed,
+          total_timesteps=int(40e6),
+          gamma=0.99,
+          log_interval=1,
+          nprocs=32,
+          nsteps=20,
+          nstack=4,
+          ent_coef=0.01,
+          vf_coef=0.5,
+          vf_fisher_coef=1.0,
+          lr=0.25,
+          max_grad_norm=0.5,
+          kfac_clip=0.001,
+          save_interval=None,
+          lrschedule='linear',
+          callback=None):
+
   tf.reset_default_graph()
   set_global_seeds(seed)
 
   nenvs = env.num_envs
   ob_space = env.observation_space
   ac_space = env.action_space
-  make_model = lambda : Model(policy, ob_space, ac_space, nenvs, total_timesteps, nprocs=nprocs,
-                              nsteps=nsteps, nstack=nstack, ent_coef=ent_coef, vf_coef=vf_coef,
-                              vf_fisher_coef=vf_fisher_coef, lr=lr, max_grad_norm=max_grad_norm,
-                              kfac_clip=kfac_clip, lrschedule=lrschedule)
+  make_model = lambda : Model(policy,
+                              ob_space,
+                              ac_space,
+                              nenvs,
+                              total_timesteps,
+                              nprocs=nprocs,
+                              nsteps=nsteps,
+                              nstack=nstack,
+                              ent_coef=ent_coef,
+                              vf_coef=vf_coef,
+                              vf_fisher_coef=vf_fisher_coef,
+                              lr=lr,
+                              max_grad_norm=max_grad_norm,
+                              kfac_clip=kfac_clip,
+                              lrschedule=lrschedule)
+
   if save_interval and logger.get_dir():
     import cloudpickle
     with open(osp.join(logger.get_dir(), 'make_model.pkl'), 'wb') as fh:
