@@ -7,9 +7,9 @@ import zipfile
 
 import baselines.common.tf_util as U
 
+from deepq import build_graph
 from baselines import logger
 from baselines.common.schedules import LinearSchedule
-from baselines import deepq
 from baselines.deepq.replay_buffer import ReplayBuffer, PrioritizedReplayBuffer
 
 
@@ -22,7 +22,7 @@ class ActWrapper(object):
   def load(path, num_cpu=16):
     with open(path, "rb") as f:
       model_data, act_params = dill.load(f)
-    act = deepq.build_act(**act_params)
+    act = build_graph.build_act(**act_params)
     sess = U.make_session(num_cpu=num_cpu)
     sess.__enter__()
     with tempfile.TemporaryDirectory() as td:
@@ -171,7 +171,7 @@ def learn(env,
   def make_obs_ph(name):
     return U.BatchInput((84,84,4), name=name)
 
-  act, train, update_target, debug = deepq.build_train(
+  act, train, update_target, debug = build_graph.build_train(
     make_obs_ph=make_obs_ph,
     q_func=q_func,
     num_actions=env.action_space.n,
